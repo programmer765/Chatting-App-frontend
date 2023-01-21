@@ -7,7 +7,8 @@ import {
 import MicIcon from "@mui/icons-material/Mic";
 import { Avatar, IconButton } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
-import axios from "../../axios";
+import axios from "axios";
+import _axios from "../../axios";
 import "./chat.css";
 import _ from "lodash";
 import { useDataLayerValue } from "../../DataLayer/DataLayer";
@@ -26,11 +27,26 @@ function Chat() {
   });
 
   useEffect(() => {
-    axios.get(`/messages/sync/${name}`).then((response) => {
-      const msg = response.data;
-      setMessages(response.data);
-      setLastSeen(msg ? msg[msg.length - 1]?.timestamp : undefined);
-    });
+    const config = {
+      method: "get",
+      url: `https://kind-erin-mite-hem.cyclic.app/messages/sync/${name}`,
+      headers: {},
+    };
+
+    axios(config)
+      .then(function (response) {
+        const msg = response.data;
+        setMessages(response.data);
+        setLastSeen(msg ? msg[msg.length - 1]?.timestamp : undefined);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+    // axios.get(`/messages/sync/${name}`).then((response) => {
+    //   const msg = response.data;
+    //   setMessages(response.data);
+    //   setLastSeen(msg ? msg[msg.length - 1]?.timestamp : undefined);
+    // });
   }, [name]);
 
   useEffect(() => {
@@ -53,7 +69,7 @@ function Chat() {
   const sendMessage = async (e) => {
     e.preventDefault();
     if (input.length === 0) return;
-    await axios.post(`/messages/new/${name}`, {
+    await _axios.post(`/messages/new/${name}`, {
       message: input,
       name: user.displayName.split(" ")[0],
       timestamp:
